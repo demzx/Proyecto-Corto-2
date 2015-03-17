@@ -1,0 +1,29 @@
+module Disciriminador_de_teclas(
+input wire [7:0] Tecla,
+output reg [7:0] Tecla_sig
+  );
+  
+ always @*  
+ begin
+		Tecla_sig = 8'd0;  
+	case (Tecla) 
+		 8'h2D : Tecla_sig = 8'h2D; // Se deja pasar la tecla R
+		 8'h4D : Tecla_sig = 8'h4D; // Se deja pasar la tecla P
+		 8'h2C : Tecla_sig = 8'h2C; // Se deja pasar la tecla T
+		 8'h43 : Tecla_sig = 8'h43; // Se deja pasar la tecla I
+		 8'h3A : Tecla_sig = 8'h3A; // Se deja pasar la tecla M
+		 8'h45 : Tecla_sig = 8'h45; // Se deja pasar la tecla 0
+		 8'h16 : Tecla_sig = 8'h16; // Se deja pasar la tecla 1
+		 8'h1E : Tecla_sig = 8'h1E; // Se deja pasar la tecla 2
+		 8'h26 : Tecla_sig = 8'h26; // Se deja pasar la tecla 3
+		 8'h25 : Tecla_sig = 8'h25; // Se deja pasar la tecla 4
+		 8'h2E : Tecla_sig = 8'h2E; // Se deja pasar la tecla 5
+		 8'h36 : Tecla_sig = 8'h36; // Se deja pasar la tecla 6
+       8'h3D : Tecla_sig = 8'h3D; // Se deja pasar la tecla 7
+		 8'h3E : Tecla_sig = 8'h3E; // Se deja pasar la tecla 8
+		 8'h46 : Tecla_sig = 8'h46; // Se deja pasar la tecla 9
+		 8'h5A : Tecla_sig = 8'h5A; // Se deja pasar la tecla ENTER
+  	    default : Tecla_sig = 8'h00; // cualquier tecla que no sea la anterior se ignora y se ponen 00  
+	endcase
+ end
+endmodule
