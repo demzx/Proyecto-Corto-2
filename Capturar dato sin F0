@@ -1,0 +1,54 @@
+module capturar(
+			input wire [7:0] dout_1,
+			input wire clck,rst,
+			input wire rx_done_tick_1,
+			output wire [7:0] salida_1
+			);
+			
+reg x;
+reg x_next;
+reg [7:0] sal ;
+reg [7:0] sal_next;
+
+
+   always @(posedge clck, posedge rst) 
+          begin
+          if (rst) 
+			     begin
+	           x <= 1'b0 ;
+				  sal <=8'd0;
+				  
+				  end
+          else 
+			     begin
+              x <= x_next;
+				  sal <= sal_next;
+				  end
+          end
+ 
+ 
+         
+   always @*//Detecta cualquier cambio
+      begin
+		     sal_next = sal;
+			  x_next=x;
+			  
+			  if (rx_done_tick_1 && dout_1 == 8'hF0)
+		         begin
+		         x_next = 1'b1;//Cambia el estado para otro nuevo caracter
+		         end
+		     
+						  
+	        else if (rx_done_tick_1 && x_next && dout_1 != 8'hF0)
+		              begin
+		              x_next = 1'b0;//Indica que el proximo cambi0 se debe tomar
+		              sal_next = dout_1;
+		              end
+			
+
+      end
+		
+assign salida_1 = sal;
+
+		
+endmodule
