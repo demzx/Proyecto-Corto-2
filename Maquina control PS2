@@ -1,0 +1,68 @@
+module maquina_de_Estados(
+input wire P,T, 
+input wire Clock,Reset,
+input wire Listo_T,
+output wire Enable_OP,Enable_modulos
+ );
+	 
+reg Op,Op_next,modulos,modulos_next;
+
+localparam [1:0] 
+           Inicio_P = 2'b00,
+			  P_T_I = 2'b01,
+			  Temperatura_Lista =2'b10;
+			  
+
+reg [1:0] Estado_Presente,Estado_Next;
+
+
+always @(posedge Clock, posedge Reset)
+        begin
+		  if (Reset)
+		      begin
+	         Estado_Presente <= Inicio_P ;
+				Op <= 0;
+				modulos <= 0;
+            end
+		  else 
+		       begin
+             Estado_Presente<=Estado_Next;
+				 Op <= Op_next;
+				 modulos_next <=modulos;
+	          end
+		  end
+		
+ always@*
+          begin
+          Estado_Next=Estado_Presente;
+			 Op_next=Op;
+			 modulos= modulos_next;
+			 
+          case(Estado_Presente)
+                  
+					Inicio_P: if (P)	 
+								 Estado_Next = P_T_I;
+				             else 
+								 Estado_Next = Inicio_P;
+				
+				    P_T_I:  if (T)
+					         begin
+								Estado_Next = Temperatura_Lista;
+     					      end
+							   else 
+                        Estado_Next = P_T_I;
+								
+      Temperatura_Lista:
+                        if (Listo_T)
+                        Estado_Next = P_T_I;
+								else 
+							   Estado_Next = Temperatura_Lista;
+								
+            default :  								 
+				           Estado_Next = Inicio_P;
+
+			 endcase 			 
+		 end
+assign Enable_modulos = (Estado_Presente == P_T_I) || (Estado_Presente == Temperatura_Lista) ;
+assign Enable_OP = (Estado_Presente == Temperatura_Lista);
+endmodule 
