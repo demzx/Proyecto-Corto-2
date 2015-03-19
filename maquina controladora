@@ -1,0 +1,133 @@
+module maquina_controladora(
+input wire [7:0] key, 
+input wire Clock,Reset,
+output wire Ignicion,movimiento,
+output wire [5:0] Temp 
+ );
+	 
+reg Ig,Ig_next,mov,mov_next;
+reg [5:0] temp,temp_next; 
+
+localparam [3:0] 
+            P = 4'b0000,
+			   I = 4'b0001,
+			   T1 = 4'b0010,
+			   M =  4'b0011,
+			   T2 = 4'b0100,
+			   T3 = 4'b0101,
+			   T4 = 4'b0110,
+			   I_OFF = 4'b0111,
+			   M_OFF = 4'b1000;
+
+reg [3:0] Estado_Presente,Estado_Next;
+
+
+always @(posedge Clock, posedge Reset)
+        begin
+		  if (Reset)
+		      begin
+	         Estado_Presente <=P;
+				Ig <= 0;
+				mov <= 0;
+				temp <= 0;
+            end
+		  else 
+		       begin
+             Estado_Presente<=Estado_Next;
+				 Ig <= Ig_next;
+				 mov <= mov_next;
+				 temp <= temp_next;
+	          end
+		  end
+		
+ always@*
+          begin
+          Estado_Next=Estado_Presente;
+			 Ig_next = Ig;
+			 mov_next = mov;
+			 temp_next=temp;
+          case(Estado_Presente)
+                  
+					          P: if (key == 8'h4D)	 // tecla igual a P
+								        Estado_Next = I;
+				                else 
+								        Estado_Next = P;
+		
+				            I:  if (key == 8'h43) // tecla igual a I
+					                begin
+										    Ig_next = 1'b1;
+								          Estado_Next = T1 ;
+     					                end
+									 else
+                                Estado_Next = T1;
+										  
+								T1:  if (key == 8'h16) // tecla igual a 1
+					                begin
+										 temp_next= 6'd20;
+								       Estado_Next = M ;
+     					             end
+							       else 
+                               Estado_Next = M;
+										 
+                        M:  if (key == 8'h3A) // tecla igual a M
+								      begin										
+										    mov_next = 1'b1;
+								          Estado_Next = T2;
+    									 end
+							       else 
+                               Estado_Next = T2;
+										 
+							  
+										 
+							   T2: if (key == 8'h1E) // tecla igual a 2
+					                begin
+										 temp_next= 6'd26;
+								       Estado_Next = T3 ;
+     					             end
+							       else 
+                               Estado_Next = T3;
+										 
+								T3: if (key == 8'h26) // tecla igual a 3
+					                begin
+										 temp_next= 6'd28;
+								       Estado_Next = T4 ;
+     					             end
+							       else 
+                               Estado_Next = T4;
+										 
+								T4: if (key == 8'h25) // tecla igual a 4
+					                begin
+										 temp_next= 6'd33;
+								       Estado_Next = I_OFF;
+     					             end
+							       else 
+                               Estado_Next = I_OFF;
+										 
+								I_OFF :if (key == 8'h44) // tecla O
+								       begin 
+										 Ig_next = 1'b0;
+										 Estado_Next = M_OFF;
+										 end 
+										 else 
+										 Estado_Next = M_OFF;
+										 
+						      M_OFF: if (key == 8'h15) // tecla Q
+								       begin 
+										 mov_next = 1'b0;
+										 Estado_Next = I;
+										 end 
+										 else 
+										 Estado_Next = I;
+
+
+                   default:  								 
+				                   Estado_Next = P;
+
+			 endcase 			 
+		 end
+		 
+assign Ignicion =  Ig ;
+assign movimiento = mov;
+assign Temp = temp;
+
+endmodule
