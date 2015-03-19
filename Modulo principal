@@ -17,34 +17,59 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module test_teclado(
-input wire Clock_in, Reset_in,//optem,
-input wire ps2d_in, ps2c_in, rx_enable_in,
-output wire b,carga,datod,
-output wire [6:0] temp
 
+module Proyecto_Corto_2(
+input wire Clock_in, reset,
+input wire ps2d_in, ps2c_in, rx_enable_in,
+output wire b,
+output wire [2:0] Salidas,
+output wire sistema_Act,
+output wire [3:0] seg_7_A,
+output wire [6:0] seg_7_C,
+output wire [7:0] Tecla_Op
     );
 
 wire [7:0] tecla,tecla_T,dato_tec;
-wire P,T,Listo_T,Enable_OP,Enable_modulos;
+wire rx_not;
+wire reset;
+assign rx_not=rx_enable_in;
+wire [5:0] temp;
+wire movimento,ignicion;
+wire Clock_1Khz;
 
+Modulo_Recepcion_PS2 PS2 (.Clock(Clock_in),.Reset(reset), .ps2d(ps2d_in),.ps2c(ps2c_in),.rx_enable(rx_not), .rx_done_Tick(data_ready),.breg_0(b),.dout(tecla));
 
-Modulo_Recepcion_PS2 PS2 (.Clock(Clock_in),.Reset(Reset_in), .ps2d(ps2d_in),.ps2c(ps2c_in),.rx_enable(rx_enable_in), .rx_done_Tick(data_ready),.breg_0(b),.dout(tecla));
-
-capturar captu (.dout_1(tecla), .clck(Clock_in), .rst(Reset_in), .rx_done_tick_1(data_ready), .salida_1(tecla_T));
+capturar captu (.dout_1(tecla), .clck(Clock_in), .rst(reset), .rx_done_tick_1(data_ready), .salida_1(tecla_T));
 
 Disciriminador_de_teclas discriminador (.Tecla(tecla_T),.Tecla_sig(dato_tec));
 
-maquina_de_Estados Maquina_control_Ps2 (
-    .P(P), 
-    .T(T), 
+maquina_controladora Control (
+    .key(dato_tec), 
     .Clock(Clock_in), 
-    .Reset(Reset_in), 
-    .Listo_T(Listo_T), 
-    .Enable_OP(Enable_OP), 
-    .Enable_modulos(Enable_modulos)
+    .Reset(reset), 
+    .Ignicion(ignicion), 
+    .movimiento(movimiento), 
+    .Temp(temp)
     );
 
+reset_sistem instance_name (
+    .key(dato_tec), 
+    .reset(reset)
+    );
+
+Divisor_de_frecuencias divosor_reloj (.Clck_in(Clock_in),.Clock_out(Clock_1Khz));
+
+Proyecto_Corto_1 Proyecto_1(
+    .Temp(temp), 
+    .ignicion(ignicion), 
+    .movimiento(movimiento), 
+    .reset(reset), 
+    .clock_In_Nexys(Clock_in), 
+    .Salidas(Salidas), 
+    .sistema_Act(sistema_Act), 
+    .seg_7_A(seg_7_A), 
+    .seg_7_C(seg_7_C)
+    );
 
 
 
@@ -52,3 +77,8 @@ maquina_de_Estados Maquina_control_Ps2 (
 
 
 endmodule
+
+
+
+
+
